@@ -13,6 +13,18 @@ inputs:
     description: 'slack channel to notify'
     required: true
     default: 'dev'
+  AWS_ACCESS_KEY_ID:  # id of input
+    required: true
+  AWS_SECRET_ACCESS_KEY:  # id of input
+    required: true
+  AWS_REGION:  # id of input
+    required: true
+  KUBECONFIG:  # id of input
+    required: true
+  RELEASE_TOKEN:  # id of input
+    required: true
+  SLACK_BOT_TOKEN:  # id of input
+    required: true
 runs:
   using: "composite"
   steps:
@@ -27,14 +39,14 @@ runs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ inputs.AWS_REGION }}
 
     - name: build
       env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBECONFIG }}
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        KUBE_CONFIG_DATA: ${{ inputs.KUBECONFIG }}
+        GITHUB_TOKEN: ${{ inputs.RELEASE_TOKEN }}
       run: |
         ./bin/build-and-deploy-module.sh ${{ inputs.module }} ${{ inputs.env }}
 
@@ -49,4 +61,4 @@ runs:
         # For posting a simple plain text message
         slack-message: "Api build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
       env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
